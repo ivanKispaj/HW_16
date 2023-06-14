@@ -1,0 +1,22 @@
+CPP = g++ # компилятор
+FLAGS = -std=c++2a -stdlib=libc++ # флаги компиляции
+TARGETSRC = main.cpp # главный main файл
+TARGET = bin/main # цель -> исполняемый файл
+LIB = bin/library.a # промежуточная библиотека
+SOURCES = $(patsubst %.cpp,%,$(wildcard ./Project/*.cpp)) # файлы ресурсов ( Все cpp файлы в каталоге Project)
+
+# Основная цель зависиьт от библиотеки lib
+all: 	$(TARGETSRC) lib
+		$(CPP) $(FLAGS) -o $(TARGET) $(TARGETSRC) -L. $(LIB)
+		rm -rf $(SOURCES:=.o) $(LIB)
+lib: 					# В цикле создаем все объектные файлы
+		$(foreach file,$(SOURCES),\
+		$(CPP) $(FLAGS) -c -o $(file).o $(file).cpp ;)
+		ar rc $(LIB) $(SOURCES:=.o) 
+
+
+clean:
+		rm -rf $(SOURCES:=.o) $(LIB)
+
+print-%  : ; @echo $* = $($*) #для вывода в консоль значения переменных (для теста использовал) -> make -f makefile print-SOURCES
+
