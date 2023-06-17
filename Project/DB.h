@@ -11,13 +11,19 @@
 #include "User.h"
 #include "Message.h"
 #include <memory>
+#include <fstream>
+#include <filesystem>
+#include <stdlib.h>
+
 
 class DB
 {
 
     IDBCore<User> *_userDB = new DBCoreMap<User>();          // create table User
     IDBCore<Message> *_messageDB = new DBCoreMap<Message>(); // create table Message
-
+    std::string _fileBaseDir = "./bin/";
+    std::string _usersFile = "Users.txt";
+    std::string _messagesFile = "Messages.txt";
 public:
     /// @brief default init
     DB() = default;
@@ -28,6 +34,10 @@ public:
         delete _userDB;
         delete _messageDB;
     }
+
+    void saveToFileData();
+    void loadMessagesFromFile();
+    bool loadUsersFromFile();
 
     /// @brief adds a new user to the database
     /// @param user struct User

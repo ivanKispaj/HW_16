@@ -22,15 +22,27 @@ public:
     /// @param pass std::string password
     static void encodePassword(std::string &pass)
     {
-        std::string _salt = "7dB/Y2OnzC9A#EfJNFGN3l@OdHx8?*X*N(DP(VTK6#-pF57jeIFe93-R-*kRZ1zy6!uyQ)3W5q#Ht(@y";
+        std::string _salt = "POSVoqe9)!3#kfafkqfKLNOEQIg09#G";
 
         std::string out;
-        for (int i = 0; i < pass.size(); i++)
+        int index = 0;
+        while (index < pass.size())
         {
-            char symbol = pass[i] << 4;
+            char ch = pass[index];
+            char symbol = ch - pass[pass.size() - index] + _salt[index];
             out.push_back(symbol);
-            out.push_back(_salt[i]);
+            out.push_back(_salt[index]);
+            index++;
         }
+
+        while (index < _salt.size())
+        {
+            char ch = _salt[index] >> 1;
+            char symbol = ch + '!';
+            out.push_back(symbol);
+            index++;
+        }
+
         pass = out;
     }
 };

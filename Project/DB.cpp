@@ -6,12 +6,107 @@
 
 #include "DB.h"
 #include "EncodePassword.h"
+namespace fs = std::filesystem;
+void DB::saveToFileData()
+{
+
+    std::string usersfile = _fileBaseDir + _usersFile;
+    std::string messagesfile = _fileBaseDir + _messagesFile;
+    fs::path userstxt{usersfile};
+    fs::path messagestxt{messagesfile};
+    if (fs::exists(userstxt) && fs::exists(messagestxt))
+    {
+        fs::permissions(usersfile, fs::perms::owner_write, fs::perm_options::add);
+        fs::permissions(messagesfile, fs::perms::owner_write, fs::perm_options::add);
+    }
+
+    std::fstream file_outU(usersfile, std::ios::out | std::ios::trunc);
+    std::fstream file_outM(messagesfile, std::ios::out | std::ios::trunc);
+
+    if (_userDB->count() > 0)
+    {
+
+        int count = 0;
+        std::unique_ptr<User[]> usersAll = _userDB->getTableData(count);
+        for (int i = 0; i < count; i++)
+        {
+            file_outU << usersAll[i] << std::endl;
+        }
+        file_outU.close();
+    }
+
+    if (_messageDB->count() > 0)
+    {
+        fs::permissions(messagesfile, fs::perms::owner_write, fs::perm_options::add);
+
+        int count = 0;
+        std::unique_ptr<Message[]> messages = _messageDB->getTableData(count);
+        for (int i = 0; i < count; i++)
+        {
+            file_outM << messages[i] << std::endl;
+        }
+        file_outM.close();
+    }
+
+    fs::permissions(usersfile, fs::perms::group_all | fs::perms::owner_all | fs::perms::others_all, fs::perm_options::remove);
+    fs::permissions(messagesfile, fs::perms::group_all | fs::perms::owner_all | fs::perms::others_all, fs::perm_options::remove);
+}
+
+void DB::loadMessagesFromFile()
+{
+    std::string messagesfile = _fileBaseDir + _messagesFile;
+    fs::path messagestxt{messagesfile};
+    if (fs::exists(messagestxt))
+    {
+        fs::permissions(messagesfile, fs::perms::owner_read, fs::perm_options::add);
+
+        std::fstream file_readM(messagesfile, std::ios::in);
+
+        if (file_readM.is_open())
+        {
+            Message message;
+            while (file_readM >> message)
+            {
+                message._currentId++;
+                _messageDB->append(message);
+            }
+        }
+        file_readM.close();
+        fs::permissions(messagesfile, fs::perms::group_all | fs::perms::owner_all | fs::perms::others_all, fs::perm_options::remove);
+    }
+}
+
+bool DB::loadUsersFromFile()
+{
+    std::string usersfile = _fileBaseDir + _usersFile;
+    fs::path userstxt{usersfile};
+    if (fs::exists(userstxt))
+    {
+        fs::permissions(usersfile, fs::perms::owner_read, fs::perm_options::add);
+        std::fstream file_readU{usersfile, std::ios::in};
+        if (file_readU.is_open())
+        {
+            User user;
+            bool ret{false};
+            while (file_readU >> user)
+            {
+                user._currentId++;
+                _userDB->append(user);
+                ret = true;
+            }
+            file_readU.close();
+            fs::permissions(usersfile, fs::perms::group_all | fs::perms::owner_all | fs::perms::others_all, fs::perm_options::remove);
+            return ret;
+        }
+    }
+    return false;
+}
 
 bool DB::addUser(User &user)
 {
     if (isUniqueLogin(user.getUserLogin()))
     {
-        if (user.getId() == 0)
+        if (user.getId() == -1)
         {
             user.setCurrentID();
         }

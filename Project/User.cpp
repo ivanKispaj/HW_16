@@ -144,3 +144,56 @@ void User::deletedMessage()
         _messageCount--;
     }
 }
+
+void User::saveUserPassword(const std::string &pass)
+{
+    _pass = pass;
+}
+
+std::istream &operator>>(std::istream &is, User &obj)
+{
+    std::string name;
+    std::string login;
+    std::string pass;
+    long long id{0};
+    bool isAdmin;
+    bool isBanned;
+    bool isDeleted;
+    is >> id;
+    is >> name;
+    is >> login;
+    is >> isAdmin;
+    is >> isBanned;
+    is >> isDeleted;
+    int passStartPos = is.tellg();
+    is.seekg(passStartPos + 1);
+    std::getline(is, pass);
+    obj.setUserName(name);
+    obj.setUserLogin(login);
+    obj.saveUserPassword(pass);
+    obj.setUserID(id);
+    obj.setIsAdmin(isAdmin);
+    obj.setIsBanned(isBanned);
+    return is;
+}
+
+std::ostream &operator<<(std::ostream &os, const User &obj)
+{
+    {
+        os << obj.getId();
+        os << " ";
+        os << obj.getUserName();
+        os << ' ';
+        os << obj.getUserLogin();
+        os << ' ';
+        os << obj.isAdmin();
+        os << ' ';
+        os << obj.isBanned();
+        os << ' ';
+        os << obj.isDeleted();
+        os << ' ';
+        os << obj.getUserPassword();
+
+        return os;
+    }
+}

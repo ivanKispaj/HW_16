@@ -7,17 +7,18 @@
 
 #pragma once
 #include <string>
-
+#include <fstream>
 
 struct User
 {
     friend class DB;
+
 private:
     std::string _name;
     std::string _login;
     std::string _pass;
     int _messageCount{0};
-    long long int _id{0};
+    long long int _id{-1};
     static long long int _currentId;
     bool _isAdmin{false};   // true if the user is an admin
     bool _isBanned{false};  // true if the user is an banned
@@ -125,4 +126,11 @@ public:
     /// @param user User to assign struct "User"
     /// @return User
     User &operator=(const User &user);
+
+    void saveUserPassword(const std::string &pass);
+
+    friend std::istream &operator>>(std::istream &is, User &obj);
+  
+    friend std::ostream &operator<<(std::ostream &os, const User &obj);
+ 
 };

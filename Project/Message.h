@@ -6,15 +6,13 @@
 
 #pragma once
 #include <string>
-// #define private      \
-//     friend class DB; \
-// private
+#include <fstream>
 
 struct Message
 {
-    
+
     friend class DB;
-    
+
     // true - a message from a private chat
     // false = true - a message from a public chat
     bool isPrivate{false};
@@ -47,6 +45,8 @@ struct Message
     /// @param recipientID int -> ID of the message recipient
     void setRecipientID(int recipientID);
 
+    void setId(long long int id);
+
     /// @brief Returns a message as a string
     /// @return string
     const std::string &getMessage() const;
@@ -70,11 +70,10 @@ struct Message
     // #undef private
     //     // Private methods for Friends "DB"
 
-    //     /// @brief set date Unix Timestamp
-    //     void setDateMessage();
-
-    //     /// @brief  set message unique id
-    //     void setMessageId();
+    /// @brief set date Unix Timestamp
+    void setDateMessage(int date);
+    // /// @brief  set message unique id
+    // void setMessageId();
 
     //     /// @brief Overloading the assignment operator "="
     //     /// @param message Message to assign struct "Message"
@@ -84,7 +83,10 @@ struct Message
     /// @param message Message to assign struct "Message"
     /// @return Message
     Message &operator=(const Message &message);
-     void deleteThisData();
+    void deleteThisData();
+
+    friend std::ostream &operator<<(std::ostream &os, const Message &obj);
+    friend std::istream &operator>>(std::istream &is, Message &obj);
 private:
     std::string _message;
     int _authorID = 0;
@@ -99,6 +101,4 @@ private:
 
     /// @brief  set message unique id
     void setMessageId();
-
-   
 };
